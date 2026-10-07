@@ -17,14 +17,33 @@ export default function Contact() {
 
     const form = event.currentTarget;
     const formData = new FormData(form);
+    const accessKey = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY;
+
+    if (!accessKey) {
+      setStatus("error");
+      setError("The free email form is not activated yet. Add its Web3Forms access key in Vercel to enable submissions.");
+      return;
+    }
+
+    // Keep the honeypot quiet: automated fills are treated as completed but never sent.
+    if (String(formData.get("website") ?? "").trim()) {
+      setStatus("sent");
+      form.reset();
+      return;
+    }
+    formData.delete("website");
+    formData.set("access_key", accessKey);
+    formData.set("subject", "New project inquiry — Velora Motion Studio");
+    formData.set("from_name", "Velora Motion Studio website");
+
     try {
-      const response = await fetch("/api/contact", {
+      const response = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify(Object.fromEntries(formData.entries())),
       });
       const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "We couldn't send your message.");
+      if (!response.ok || !result.success) throw new Error(result.message || "We couldn't send your message.");
       setStatus("sent");
       form.reset();
     } catch (submissionError) {
@@ -55,6 +74,7 @@ export default function Contact() {
             </div>
             <label className="block text-sm text-white/55">Message<textarea name="message" required minLength={10} maxLength={5000} rows={6} className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[.04] p-3 outline-none" placeholder="Tell us about the project..." /></label>
             <label aria-hidden="true" className="absolute -left-[10000px] h-px w-px overflow-hidden">Leave this field empty<input name="website" tabIndex={-1} autoComplete="off" /></label>
+            <input type="checkbox" name="botcheck" className="hidden" tabIndex={-1} aria-hidden="true" />
             {status === "error" && <p role="alert" className="text-sm text-rose-300">{error}</p>}
             <button disabled={status === "sending"} className="inline-flex items-center rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-black disabled:cursor-wait disabled:opacity-60">
               {status === "sending" ? "Sending…" : "Send inquiry"}<ArrowRight className="ml-2" size={16} />

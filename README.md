@@ -71,17 +71,13 @@ This repository is connected to Vercel. Pushes to the production branch trigger 
 
 ## Contact form email setup
 
-The contact form submits to the server-side `POST /api/contact` route. The route validates and limits the submitted fields, filters a hidden honeypot field, and sends a plain-text email through the [Resend Email API](https://resend.com/docs/api-reference/emails/send-email). The sender domain must be verified in Resend.
+The contact form uses the [Web3Forms API](https://docs.web3forms.com/getting-started/api-reference), which can deliver submissions to an email inbox without requiring a custom sender domain or a server-side email account. The provider's free plan currently includes up to **250 submissions per month**. A hidden honeypot helps filter automated submissions.
 
-Configure these **server-only** environment variables in Vercel → Project Settings → Environment Variables (Production, and Preview if desired):
+1. Create a free form at [web3forms.com](https://web3forms.com/). Enter the inbox where inquiries should arrive and verify that address; Web3Forms emails its form Access Key to that inbox.
+2. In Vercel → Velora project → Settings → Environment Variables, add `NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY` with that Access Key for Production (and Preview if needed).
+3. Redeploy the project so Next.js includes the key in the public form bundle.
 
-| Variable | Value |
-| --- | --- |
-| `RESEND_API_KEY` | A restricted Resend API key with permission to send email |
-| `CONTACT_TO_EMAIL` | The inbox that should receive contact inquiries |
-| `CONTACT_FROM_EMAIL` | A sender on your verified domain, e.g. `Velora Studio <contact@example.com>` |
-
-Use `.env.example` as a template for local setup. Do not commit real keys or paste them into public source. Redeploy after setting the Vercel variables. Without these values, the form returns a configuration error rather than showing a false success state.
+Web3Forms explicitly designs this Access Key for client-side use, so it is **public**, not a private Resend API secret. Do not reuse or publish a full-access Resend key. `.env.example` shows the local variable name. Until the Access Key is configured, the form displays an activation error instead of falsely claiming that an email was sent.
 
 ## Accessibility and motion
 
