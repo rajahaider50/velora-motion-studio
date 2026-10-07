@@ -1,0 +1,1 @@
+"use client";import {motion} from "framer-motion";export function Reveal({children,className=""}:{children:React.ReactNode;className?:string}){return <motion.div initial={{opacity:0,y:28}} whileInView={{opacity:1,y:0}} viewport={{once:true,amount:.15}} transition={{duration:.7,ease:[.16,1,.3,1]}} className={className}>{children}</motion.div>}
