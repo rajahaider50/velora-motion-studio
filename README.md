@@ -69,9 +69,19 @@ components/
 
 This repository is connected to Vercel. Pushes to the production branch trigger a production deployment; pull requests and other branches can be used for previews.
 
-## Contact form note
+## Contact form email setup
 
-The contact form currently demonstrates client-side validation and a success state only. It does **not** send or store submissions. Connect a trusted email provider or server-side API before relying on it for real inquiries.
+The contact form submits to the server-side `POST /api/contact` route. The route validates and limits the submitted fields, filters a hidden honeypot field, and sends a plain-text email through the [Resend Email API](https://resend.com/docs/api-reference/emails/send-email). The sender domain must be verified in Resend.
+
+Configure these **server-only** environment variables in Vercel → Project Settings → Environment Variables (Production, and Preview if desired):
+
+| Variable | Value |
+| --- | --- |
+| `RESEND_API_KEY` | A restricted Resend API key with permission to send email |
+| `CONTACT_TO_EMAIL` | The inbox that should receive contact inquiries |
+| `CONTACT_FROM_EMAIL` | A sender on your verified domain, e.g. `Velora Studio <contact@example.com>` |
+
+Use `.env.example` as a template for local setup. Do not commit real keys or paste them into public source. Redeploy after setting the Vercel variables. Without these values, the form returns a configuration error rather than showing a false success state.
 
 ## Accessibility and motion
 
